@@ -1,13 +1,13 @@
 #!/bin/bash
 
-prefix_name="Importance"
+prefix_name="Surface"
 date_time=$(date +"%Y_%m_%d_%H_%M_%S")
 
 name=$prefix_name'_'$date_time
 outputDir="../results/$name"
 
 logfile="../results/$name/log.txt"
-train_args="--outputDir $outputDir --samplingMethod Surface"
+train_args="--outputDir $outputDir --samplingMethod $prefix_name --epochLengthPow 3"
 #train_args="--outputDir $outputDir --epochLengthPow 6 --epochs 1000 --writeOutEpochs 1"
 #train_args="--outputDir $outputDir --showVis 1 --reconstructionRes 128"
 
