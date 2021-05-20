@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     for m in trainedModels:
         modelPath = os.path.join(args.weightPath, m)
-        meshPath = os.path.join(args.meshPath, "{}.stl".format(m))
+        meshPath = os.path.join(args.meshPath, "{}.obj".format(m))
         try:
             print("[INFO] Loading model: ", m)
             sdfModel = loadModel(modelPath, archPath=args.archPath)
