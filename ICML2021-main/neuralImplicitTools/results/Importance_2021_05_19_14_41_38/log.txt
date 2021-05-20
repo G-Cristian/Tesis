@@ -1,0 +1,6 @@
+Inicio -- 2021_05_19_14_41_38 --
+Ejecutando trainer.py para armadillo.obj (2021_05_19_14_41_38) ...
+... Fin ejecutando trainer.py para armadillo.obj -- 2021_05_19_14_50_01 --
+Ejecutando modelmesher.py para armadillo.obj (2021_05_19_14_50_01) ...
+... Fin ejecutando modelmesher.py para armadillo.obj -- 2021_05_19_14_51_06 --
+Fin -- 2021_05_19_14_51_06 --
