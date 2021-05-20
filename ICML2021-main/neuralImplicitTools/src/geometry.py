@@ -17,6 +17,12 @@ from scipy.stats import gaussian_kde
 
 import matplotlib.cm as cm
 
+import os
+from sklearn.metrics.pairwise import pairwise_distances
+from sklearn.metrics.pairwise import pairwise_distances_chunked
+
+import numba_euclidean_distance
+
 #constants used for sampling box AND miniball normalization
 BOUNDING_SPHERE_RADIUS = 0.9
 SAMPLE_SPHERE_RADIUS = 1.0
@@ -152,9 +158,416 @@ class PointSampler():
         else:
             x = xRandom
 
+        print("x.shape = {0}".format(x.shape))
+        print("x[0] = {0}".format(x[0]))
         np.random.shuffle(x)    #remove bias on order
+        print("x.shape = {0}".format(x.shape))
+        return x
+
+class UniformFPS():
+    def __init__(self, mesh, denseSampleSetSize):
+        print("UniformFPS.__init__")
+        if (not mesh is None):
+            self._denseSampleSetSize = denseSampleSetSize
+            self._uniformSampler = PointSampler(mesh, ratio=1.0) # uniform sampling
+            print("denseSamples = self._uniformSampler.sample({})".format(denseSampleSetSize))
+            self._denseSamples = self._uniformSampler.sample(denseSampleSetSize)
+            print("self._denseSamples.shape = {}".format(self._denseSamples.shape))
+            print("self._denseSamples[0] = {}".format(self._denseSamples[0]))
+            if (denseSampleSetSize <= 10000):
+                self._distances = self._getDistanceMatrix(self._denseSamples)
+                #self._distancesInDisk = False
+                print("self._distances.shape = {}".format(self._distances.shape))
+                print("self._distances[0] = {}".format(self._distances[0]))
+            else:
+                self._distances = None
+                #self._distancesInDisk = True
+            
+            #print("self._distancesInDisk = {}".format(self._distancesInDisk))
+                
+    
+    def _getDistanceMatrix(self, X, metric='euclidean'):
+        print("getDistanceMatrix")
+        print("X.shape = {0}".format(X.shape))
+
+        return pairwise_distances(X, metric=metric)
+    
+    def sample(self, N):
+        print("UniformFPS.sample")
+        if (not self._distances is None):
+            x = self._fps(N)
+        else:
+            x = self._fpsLarge(N)
+        print("x.shape = {0}".format(x.shape))
+        print("x[0] = {}".format(x[0]))
+        np.random.shuffle(x)
+        print("x.shape = {0}".format(x.shape))
+        return x
+    
+    def _fps(self, N):
+        print("UniformFPS._fps")
+        D = self._distances
+        print("D.shape = {0}".format(D.shape))
+        """
+        A Naive O(N^2) algorithm to do furthest points sampling
+        
+        Parameters
+        ----------
+        D : ndarray (N, N) 
+        An NxN distance matrix for points
+        Return
+        ------
+        tuple (list, list) 
+        (permutation (N-length array of indices), 
+        lambdas (N-length array of insertion radii))
+        """
+
+        if (N > D.shape[0]):
+            print("Error: Cannot subsample more than the dense sample set size")
+
+            return None
+        
+        #N = D.shape[0]
+        
+        #By default, takes the first point in the list to be the
+        #first point in the permutation, but could be random
+        #perm = np.zeros(N, dtype=np.int64)
+        perm = np.zeros(N*3, dtype=np.float64).reshape(N,3)
+        perm[0] = self._denseSamples[0]
+        #lambdas = np.zeros(N)
+        ds = D[0, :]
+        print("ds.shape = {}".format(ds.shape))
+        for i in range(1, N):
+            idx = np.argmax(ds)
+            #perm[i] = idx
+            perm[i] = self._denseSamples[idx]
+            #lambdas[i] = ds[idx]
+            ds = np.minimum(ds, D[idx, :])
+        #return (perm, lambdas)
+        return perm
+    
+    def _fpsLarge(self, N):
+        #Calcular las distancias aca y no precomputarlas
+        #ejemplo
+        #tomar algun punto p y hacer
+        #ds = distancia de p a todos los puntos
+        #mientras no haya terminado de samplear N puntos
+        #   idx = indice del de maxima distancia (es decir el del valor maximo en ds) (creo que esto es np.argmax(ds))
+        #   tmp = calcular las distancias del punto_idx a todos los demas
+        #   ds = los valores minimos para cada posicion de ds y tmp (creo que esto es np.minimum(ds, tmp))
+        print("UniformFPS._fpsLarge")
+        
+        """
+        A Naive O(N^2) algorithm to do furthest points sampling
+        
+        Parameters
+        ----------
+        D : ndarray (N, N) 
+        An NxN distance matrix for points
+        Return
+        ------
+        tuple (list, list) 
+        (permutation (N-length array of indices), 
+        lambdas (N-length array of insertion radii))
+        """
+
+        print("self._denseSamples.shape = {}".format(self._denseSamples.shape))
+
+        if (N > self._denseSamples.shape[0]):
+            print("Error: Cannot subsample more than the dense sample set size")
+
+            return None
+        
+        #By default, takes the first point in the list to be the
+        #first point in the permutation, but could be random
+        #perm = np.zeros(N, dtype=np.int64)
+        perm = np.zeros(N*3, dtype=np.float64).reshape(N,3)
+        perm[0] = self._denseSamples[0]
+        
+        ds = np.zeros(self._denseSamples.shape[0])
+        print("self._distanceSq_Fast(perm[0], self._denseSamples, ds)")
+        self._distanceSq_Fast(perm[0], self._denseSamples, ds)
+        tmp = np.zeros(self._denseSamples.shape[0])
+        print("ds.shape = {}".format(ds.shape))
+        for i in range(1, N):
+            if ((i % 1000) == 0):
+                print("iteracion " + str(i))
+                print("ds.shape = {}".format(ds.shape))
+                print("tmp.shape = {}".format(tmp.shape))
+            
+            if ((i % 1000) == 0):
+                print("idx = np.argmax(ds, axis=0)")
+            idx = np.argmax(ds, axis=0)
+            perm[i] = self._denseSamples[idx]
+            if ((i % 1000) == 0):
+                print("self._distanceSq_Fast(perm[i], self._denseSamples, tmp)")
+            self._distanceSq_Fast(perm[i], self._denseSamples, tmp)
+            
+            if ((i % 1000) == 0):
+                print("ds = np.minimum(ds, tmp)")
+            ds = np.minimum(ds, tmp)
+            if ((i % 1000) == 0):
+                print("ds.shape = {}".format(ds.shape))
+                print("tmp.shape = {}".format(tmp.shape))
+                print("fin iteracion " + str(i))
+            #print("ds.shape = {}".format(ds.shape))
+
+            
+        
+        return perm
+    
+    def _distanceSq(self, point, arrayOfPoints):
+        #print("UniformFPS._distanceSq")
+        #print("point.shape = {}".format(point.shape))
+        #print("point[0] = {}".format(point[0]))
+        #print("arrayOfPoints.shape = {}".format(arrayOfPoints.shape))
+        #print("arrayOfPoints[0] = {}".format(arrayOfPoints[0]))
+        
+        pointCopyArray = np.tile(point, (arrayOfPoints.shape[0],1))
+        #print("pointCopyArray.shape = {}".format(pointCopyArray.shape))
+
+        dif = pointCopyArray - arrayOfPoints
+        #print("dif.shape = {}".format(dif.shape))
+
+        distancesSq = np.sum(dif*dif, axis=1)
+        #print("distancesSq.shape = {}".format(distancesSq.shape))
+
+        return distancesSq
+    
+    def _distanceSq_Fast(self, point, arrayOfPoints, output):
+        #print("UniformFPS._distanceSq")
+        #print("point.shape = {}".format(point.shape))
+        #print("point[0] = {}".format(point[0]))
+        #print("arrayOfPoints.shape = {}".format(arrayOfPoints.shape))
+        #print("arrayOfPoints[0] = {}".format(arrayOfPoints[0]))
+        
+        #pointCopyArray = np.tile(point, (arrayOfPoints.shape[0],1))
+        #print("pointCopyArray.shape = {}".format(pointCopyArray.shape))
+
+        threads_per_block = 512
+        blocks_per_grid = (arrayOfPoints.shape[0] + (threads_per_block - 1)) // threads_per_block
+
+        numba_euclidean_distance.euclidean_distance_from_point[blocks_per_grid, threads_per_block](arrayOfPoints, point, output)
+
+class SurfaceFPS():
+    def __init__(self, mesh, denseSampleSetSize, uniform_surface_ratio):
+        print("SurfaceFPS.__init__")
+        if (not mesh is None):
+            self._denseSampleSetSize = denseSampleSetSize
+            self._uniform_surface_ratio = uniform_surface_ratio
+            self._surfaceSampler = PointSampler(mesh, ratio=0.0) # surface sampling
+            print("denseSamples = self._surfaceSampler.sample({})".format(denseSampleSetSize))
+            self._denseSamples = self._surfaceSampler.sample(denseSampleSetSize)
+            print("self._denseSamples.shape = {}".format(self._denseSamples.shape))
+            print("self._denseSamples[0] = {}".format(self._denseSamples[0]))
+            if (denseSampleSetSize <= 10000):
+                self._distances = self._getDistanceMatrix(self._denseSamples)
+                #self._distancesInDisk = False
+                print("self._distances.shape = {}".format(self._distances.shape))
+                print("self._distances[0] = {}".format(self._distances[0]))
+            else:
+                self._distances = None
+                #self._distancesInDisk = True
+            
+            #print("self._distancesInDisk = {}".format(self._distancesInDisk))
+                
+    
+    def _getDistanceMatrix(self, X, metric='euclidean'):
+        print("getDistanceMatrix")
+        print("X.shape = {0}".format(X.shape))
+
+        return pairwise_distances(X, metric=metric)
+    
+    def _randomSamples(self, n):
+        """Returns n random points in unit sphere"""
+        # we want to return points in unit sphere, could do using spherical coords
+        #   but rejection method is easier and arguably faster :)
+        points = np.array([])
+        while points.shape[0] < n:
+            remainingPoints = n - points.shape[0]
+            p = (np.random.rand(remainingPoints,3) - 0.5)*2
+            #p = p[np.linalg.norm(p, axis=1) <= SAMPLE_SPHERE_RADIUS]
+
+            if points.size == 0:
+                points = p 
+            else:
+                points = np.concatenate((points, p))
+        return points
+    
+    def sample(self, n):
+        print("SurfaceFPS.sample")
+
+        nRandom = round(Decimal(n)*Decimal(self._uniform_surface_ratio))
+        nSurface = n - nRandom
+
+        xRandom = self._randomSamples(nRandom)
+
+        if nSurface > 0:
+            if (not self._distances is None):
+                xSurface = self._fps(nSurface)
+            else:
+                xSurface = self._fpsLarge(nSurface)
+            
+            #xSurface = self._normalDist(xSurface)
+            if nRandom > 0:
+                x = np.concatenate((xSurface,xRandom))
+            else:
+                x = xSurface
+        else:
+            x = xRandom
+        
+        print("x.shape = {0}".format(x.shape))
+        print("x[0] = {}".format(x[0]))
+        np.random.shuffle(x)
+        print("x.shape = {0}".format(x.shape))
 
         return x
+    
+    def _fps(self, N):
+        print("SurfaceFPS._fps")
+        D = self._distances
+        print("D.shape = {0}".format(D.shape))
+        """
+        A Naive O(N^2) algorithm to do furthest points sampling
+        
+        Parameters
+        ----------
+        D : ndarray (N, N) 
+        An NxN distance matrix for points
+        Return
+        ------
+        tuple (list, list) 
+        (permutation (N-length array of indices), 
+        lambdas (N-length array of insertion radii))
+        """
+
+        if (N > D.shape[0]):
+            print("Error: Cannot subsample more than the dense sample set size")
+
+            return None
+        
+        #N = D.shape[0]
+        
+        #By default, takes the first point in the list to be the
+        #first point in the permutation, but could be random
+        #perm = np.zeros(N, dtype=np.int64)
+        perm = np.zeros(N*3, dtype=np.float64).reshape(N,3)
+        perm[0] = self._denseSamples[0]
+        #lambdas = np.zeros(N)
+        ds = D[0, :]
+        print("ds.shape = {}".format(ds.shape))
+        for i in range(1, N):
+            idx = np.argmax(ds)
+            #perm[i] = idx
+            perm[i] = self._denseSamples[idx]
+            #lambdas[i] = ds[idx]
+            ds = np.minimum(ds, D[idx, :])
+        #return (perm, lambdas)
+        return perm
+    
+    def _fpsLarge(self, N):
+        #Calcular las distancias aca y no precomputarlas
+        #ejemplo
+        #tomar algun punto p y hacer
+        #ds = distancia de p a todos los puntos
+        #mientras no haya terminado de samplear N puntos
+        #   idx = indice del de maxima distancia (es decir el del valor maximo en ds) (creo que esto es np.argmax(ds))
+        #   tmp = calcular las distancias del punto_idx a todos los demas
+        #   ds = los valores minimos para cada posicion de ds y tmp (creo que esto es np.minimum(ds, tmp))
+        print("SurfaceFPS._fpsLarge")
+        
+        """
+        A Naive O(N^2) algorithm to do furthest points sampling
+        
+        Parameters
+        ----------
+        D : ndarray (N, N) 
+        An NxN distance matrix for points
+        Return
+        ------
+        tuple (list, list) 
+        (permutation (N-length array of indices), 
+        lambdas (N-length array of insertion radii))
+        """
+
+        print("self._denseSamples.shape = {}".format(self._denseSamples.shape))
+
+        if (N > self._denseSamples.shape[0]):
+            print("Error: Cannot subsample more than the dense sample set size")
+
+            return None
+        
+        #By default, takes the first point in the list to be the
+        #first point in the permutation, but could be random
+        #perm = np.zeros(N, dtype=np.int64)
+        perm = np.zeros(N*3, dtype=np.float64).reshape(N,3)
+        perm[0] = self._denseSamples[0]
+        
+        ds = np.zeros(self._denseSamples.shape[0])
+        print("self._distanceSq_Fast(perm[0], self._denseSamples, ds)")
+        self._distanceSq_Fast(perm[0], self._denseSamples, ds)
+        tmp = np.zeros(self._denseSamples.shape[0])
+        print("ds.shape = {}".format(ds.shape))
+        for i in range(1, N):
+            if ((i % 1000) == 0):
+                print("iteracion " + str(i))
+                print("ds.shape = {}".format(ds.shape))
+                print("tmp.shape = {}".format(tmp.shape))
+            
+            if ((i % 1000) == 0):
+                print("idx = np.argmax(ds, axis=0)")
+            idx = np.argmax(ds, axis=0)
+            perm[i] = self._denseSamples[idx]
+            if ((i % 1000) == 0):
+                print("self._distanceSq_Fast(perm[i], self._denseSamples, tmp)")
+            self._distanceSq_Fast(perm[i], self._denseSamples, tmp)
+            
+            if ((i % 1000) == 0):
+                print("ds = np.minimum(ds, tmp)")
+            ds = np.minimum(ds, tmp)
+            if ((i % 1000) == 0):
+                print("ds.shape = {}".format(ds.shape))
+                print("tmp.shape = {}".format(tmp.shape))
+                print("fin iteracion " + str(i))
+            #print("ds.shape = {}".format(ds.shape))
+
+            
+        
+        return perm
+    
+    def _distanceSq(self, point, arrayOfPoints):
+        #print("UniformFPS._distanceSq")
+        #print("point.shape = {}".format(point.shape))
+        #print("point[0] = {}".format(point[0]))
+        #print("arrayOfPoints.shape = {}".format(arrayOfPoints.shape))
+        #print("arrayOfPoints[0] = {}".format(arrayOfPoints[0]))
+        
+        pointCopyArray = np.tile(point, (arrayOfPoints.shape[0],1))
+        #print("pointCopyArray.shape = {}".format(pointCopyArray.shape))
+
+        dif = pointCopyArray - arrayOfPoints
+        #print("dif.shape = {}".format(dif.shape))
+
+        distancesSq = np.sum(dif*dif, axis=1)
+        #print("distancesSq.shape = {}".format(distancesSq.shape))
+
+        return distancesSq
+    
+    def _distanceSq_Fast(self, point, arrayOfPoints, output):
+        #print("UniformFPS._distanceSq")
+        #print("point.shape = {}".format(point.shape))
+        #print("point[0] = {}".format(point[0]))
+        #print("arrayOfPoints.shape = {}".format(arrayOfPoints.shape))
+        #print("arrayOfPoints[0] = {}".format(arrayOfPoints[0]))
+        
+        #pointCopyArray = np.tile(point, (arrayOfPoints.shape[0],1))
+        #print("pointCopyArray.shape = {}".format(pointCopyArray.shape))
+
+        #threads_per_block = 512
+        threads_per_block = 1024
+        blocks_per_grid = (arrayOfPoints.shape[0] + (threads_per_block - 1)) // threads_per_block
+
+        numba_euclidean_distance.euclidean_distance_from_point[blocks_per_grid, threads_per_block](arrayOfPoints, point, output)
 
 class ImportanceSampler():
     # M, initital uniform set size, N subset size.
