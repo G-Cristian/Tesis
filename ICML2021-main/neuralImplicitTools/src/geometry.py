@@ -21,7 +21,10 @@ import os
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.metrics.pairwise import pairwise_distances_chunked
 
-import numba_euclidean_distance
+import numba_euclidean_distance as numba_aux
+
+import time
+from fastdist import fastdist
 
 #constants used for sampling box AND miniball normalization
 BOUNDING_SPHERE_RADIUS = 0.9
@@ -285,34 +288,77 @@ class UniformFPS():
         perm[0] = self._denseSamples[0]
         
         ds = np.zeros(self._denseSamples.shape[0])
-        print("self._distanceSq_Fast(perm[0], self._denseSamples, ds)")
-        self._distanceSq_Fast(perm[0], self._denseSamples, ds)
+        print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
+        #print('ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")')
+
+        numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
+        #ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")
+
         tmp = np.zeros(self._denseSamples.shape[0])
         print("ds.shape = {}".format(ds.shape))
+        #originalIndices = np.arange(ds.shape[0], dtype=np.uint64)
+        #print("originalIndices.shape = {}".format(originalIndices.shape))
+        #tmpIndices = np.zeros((ds.shape[0] + 1) // 2, dtype=np.uint64)
+        #print("tmpIndices.shape = {}".format(tmpIndices.shape))
+        start_time = time.time()
+        print("start_time: {}".format(start_time))
         for i in range(1, N):
             if ((i % 1000) == 0):
                 print("iteracion " + str(i))
                 print("ds.shape = {}".format(ds.shape))
                 print("tmp.shape = {}".format(tmp.shape))
+                #print("originalIndices.shape = {}".format(originalIndices.shape))
+                #print("tmpIndices.shape = {}".format(tmpIndices.shape))
             
             if ((i % 1000) == 0):
                 print("idx = np.argmax(ds, axis=0)")
+                start_argmax = time.time()
+                #print("idx = numba_aux.argmax(ds, originalIndices, tmpIndices)")
+                #print("idx = numba_aux.argmax2(ds)")
             idx = np.argmax(ds, axis=0)
+            if ((i % 1000) == 0):
+                end_argmax = time.time()
+                print("idx = np.argmax(ds, axis=0) elapsed time = {}".format(end_argmax-start_argmax))
+            
+            #idx = numba_aux.argmax(ds, originalIndices, tmpIndices)
+            #idx = numba_aux.argmax2(ds)
             perm[i] = self._denseSamples[idx]
             if ((i % 1000) == 0):
-                print("self._distanceSq_Fast(perm[i], self._denseSamples, tmp)")
-            self._distanceSq_Fast(perm[i], self._denseSamples, tmp)
+                print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
+                #print('tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")')
+                start_distance = time.time()
+            
+            numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
+            #tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")
+
+            if ((i % 1000) == 0):
+                end_distance = time.time()
+                print("pytho_call_euclidean_distance_from_point elapsed time = {}".format(end_distance-start_distance))
+                #print("fastdist.vector_to_matrix_distance elapsed time = {}".format(end_distance-start_distance))
             
             if ((i % 1000) == 0):
                 print("ds = np.minimum(ds, tmp)")
+                #print("numba_aux.pytho_call_min_between_arrays_store_in_first(ds, tmp)")
+                #print("numba_aux.pytho_call_min_between_arrays_store_in_first_2(ds, tmp)")
+                start_minimum = time.time()
+            
             ds = np.minimum(ds, tmp)
+            #numba_aux.pytho_call_min_between_arrays_store_in_first(ds, tmp)
+            #numba_aux.pytho_call_min_between_arrays_store_in_first_2(ds, tmp)
+            if ((i % 1000) == 0):
+                end_minimum = time.time()
+                print("ds = np.minimum(ds, tmp) elapsed time = {}".format(end_minimum-start_minimum))
             if ((i % 1000) == 0):
                 print("ds.shape = {}".format(ds.shape))
                 print("tmp.shape = {}".format(tmp.shape))
+                #print("originalIndices.shape = {}".format(originalIndices.shape))
+                #print("tmpIndices.shape = {}".format(tmpIndices.shape))
+                end_time = time.time()
+                print("end_time: {}".format(end_time))
+                print("elapsed time = {}".format(end_time-start_time))
+                start_time = end_time
+                print("start_time: {}".format(start_time))
                 print("fin iteracion " + str(i))
-            #print("ds.shape = {}".format(ds.shape))
-
-            
         
         return perm
     
@@ -333,21 +379,6 @@ class UniformFPS():
         #print("distancesSq.shape = {}".format(distancesSq.shape))
 
         return distancesSq
-    
-    def _distanceSq_Fast(self, point, arrayOfPoints, output):
-        #print("UniformFPS._distanceSq")
-        #print("point.shape = {}".format(point.shape))
-        #print("point[0] = {}".format(point[0]))
-        #print("arrayOfPoints.shape = {}".format(arrayOfPoints.shape))
-        #print("arrayOfPoints[0] = {}".format(arrayOfPoints[0]))
-        
-        #pointCopyArray = np.tile(point, (arrayOfPoints.shape[0],1))
-        #print("pointCopyArray.shape = {}".format(pointCopyArray.shape))
-
-        threads_per_block = 512
-        blocks_per_grid = (arrayOfPoints.shape[0] + (threads_per_block - 1)) // threads_per_block
-
-        numba_euclidean_distance.euclidean_distance_from_point[blocks_per_grid, threads_per_block](arrayOfPoints, point, output)
 
 class SurfaceFPS():
     def __init__(self, mesh, denseSampleSetSize, uniform_surface_ratio):
@@ -504,34 +535,45 @@ class SurfaceFPS():
         perm[0] = self._denseSamples[0]
         
         ds = np.zeros(self._denseSamples.shape[0])
-        print("self._distanceSq_Fast(perm[0], self._denseSamples, ds)")
-        self._distanceSq_Fast(perm[0], self._denseSamples, ds)
+        print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
+        numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
         tmp = np.zeros(self._denseSamples.shape[0])
         print("ds.shape = {}".format(ds.shape))
+        #originalIndices = np.arange(ds.shape[0], dtype=np.uint64)
+        #print("originalIndices.shape = {}".format(originalIndices.shape))
+        #tmpIndices = np.zeros((ds.shape[0] + 1) // 2, dtype=np.uint64)
+        #print("tmpIndices.shape = {}".format(tmpIndices.shape))
         for i in range(1, N):
             if ((i % 1000) == 0):
                 print("iteracion " + str(i))
                 print("ds.shape = {}".format(ds.shape))
                 print("tmp.shape = {}".format(tmp.shape))
+                #print("originalIndices.shape = {}".format(originalIndices.shape))
+                #print("tmpIndices.shape = {}".format(tmpIndices.shape))
             
             if ((i % 1000) == 0):
-                print("idx = np.argmax(ds, axis=0)")
-            idx = np.argmax(ds, axis=0)
+                #print("idx = np.argmax(ds, axis=0)")
+                #print("idx = numba_aux.argmax(ds, originalIndices, tmpIndices)")
+                print("idx = numba_aux.argmax2(ds)")
+            #idx = np.argmax(ds, axis=0)
+            #idx = numba_aux.argmax(ds, originalIndices, tmpIndices)
+            idx = numba_aux.argmax2(ds)
             perm[i] = self._denseSamples[idx]
             if ((i % 1000) == 0):
-                print("self._distanceSq_Fast(perm[i], self._denseSamples, tmp)")
-            self._distanceSq_Fast(perm[i], self._denseSamples, tmp)
+                print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
+            numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
             
             if ((i % 1000) == 0):
-                print("ds = np.minimum(ds, tmp)")
-            ds = np.minimum(ds, tmp)
+                #print("ds = np.minimum(ds, tmp)")
+                print("numba_aux.pytho_call_min_between_arrays_store_in_first(ds, tmp)")
+            #ds = np.minimum(ds, tmp)
+            numba_aux.pytho_call_min_between_arrays_store_in_first(ds, tmp)
             if ((i % 1000) == 0):
                 print("ds.shape = {}".format(ds.shape))
                 print("tmp.shape = {}".format(tmp.shape))
+                #print("originalIndices.shape = {}".format(originalIndices.shape))
+                #print("tmpIndices.shape = {}".format(tmpIndices.shape))
                 print("fin iteracion " + str(i))
-            #print("ds.shape = {}".format(ds.shape))
-
-            
         
         return perm
     
@@ -552,22 +594,6 @@ class SurfaceFPS():
         #print("distancesSq.shape = {}".format(distancesSq.shape))
 
         return distancesSq
-    
-    def _distanceSq_Fast(self, point, arrayOfPoints, output):
-        #print("UniformFPS._distanceSq")
-        #print("point.shape = {}".format(point.shape))
-        #print("point[0] = {}".format(point[0]))
-        #print("arrayOfPoints.shape = {}".format(arrayOfPoints.shape))
-        #print("arrayOfPoints[0] = {}".format(arrayOfPoints[0]))
-        
-        #pointCopyArray = np.tile(point, (arrayOfPoints.shape[0],1))
-        #print("pointCopyArray.shape = {}".format(pointCopyArray.shape))
-
-        #threads_per_block = 512
-        threads_per_block = 1024
-        blocks_per_grid = (arrayOfPoints.shape[0] + (threads_per_block - 1)) // threads_per_block
-
-        numba_euclidean_distance.euclidean_distance_from_point[blocks_per_grid, threads_per_block](arrayOfPoints, point, output)
 
 class ImportanceSampler():
     # M, initital uniform set size, N subset size.
