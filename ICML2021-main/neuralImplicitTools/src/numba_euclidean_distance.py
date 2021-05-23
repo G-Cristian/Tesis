@@ -101,8 +101,8 @@ def euclidean_distance_from_point_variation(i_array_1, point, normals_array_1, n
         y = i_array_1[pos][1] - point[1]
         z = i_array_1[pos][2] - point[2]
         #cosAngle = normal_point.dot(normals_array_1[pos])
-        cosAngle = normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2]
-        o_array[pos] = (x * x + y * y + z * z) / (cosAngle + 0.0001)
+        absCosAngle = abs(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2])
+        o_array[pos] = (x * x + y * y + z * z) / (absCosAngle + 0.0001)
 
     #cuda.syncthreads()
 
