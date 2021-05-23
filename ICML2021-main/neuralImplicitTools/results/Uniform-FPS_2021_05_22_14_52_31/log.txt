@@ -1,0 +1,14 @@
+Inicio -- 2021_05_22_14_52_31 --
+Ejecutando trainer.py para ../data/armadillo.obj (2021_05_22_14_52_31) ...
+python3 trainer.py ../data/../data/armadillo.obj --outputDir ../results/Uniform-FPS_2021_05_22_14_52_31 --samplingMethod Uniform-FPS --epochLengthPow 5 --partitionPlanes xyz
+... Fin ejecutando trainer.py para ../data/armadillo.obj -- 2021_05_22_15_05_36 --
+Ejecutando modelmesher.py para ../data/armadillo.obj (2021_05_22_15_05_36) ...
+python3 modelmesher.py ../results/Uniform-FPS_2021_05_22_14_52_31
+... Fin ejecutando modelmesher.py para ../data/armadillo.obj -- 2021_05_22_15_06_41 --
+Ejecutando trainer.py para ../data/bumpy-cube.obj (2021_05_22_15_06_41) ...
+python3 trainer.py ../data/../data/bumpy-cube.obj --outputDir ../results/Uniform-FPS_2021_05_22_14_52_31 --samplingMethod Uniform-FPS --epochLengthPow 5 --partitionPlanes xyz
+... Fin ejecutando trainer.py para ../data/bumpy-cube.obj -- 2021_05_22_15_19_38 --
+Ejecutando modelmesher.py para ../data/bumpy-cube.obj (2021_05_22_15_19_38) ...
+python3 modelmesher.py ../results/Uniform-FPS_2021_05_22_14_52_31
+... Fin ejecutando modelmesher.py para ../data/bumpy-cube.obj -- 2021_05_22_15_21_44 --
+Fin -- 2021_05_22_15_21_44 --
