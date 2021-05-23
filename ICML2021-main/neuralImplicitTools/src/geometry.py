@@ -30,6 +30,73 @@ from fastdist import fastdist
 BOUNDING_SPHERE_RADIUS = 0.9
 SAMPLE_SPHERE_RADIUS = 1.0
 
+def mirrorByX(array):
+    mirror = lambda point: [-point[0],point[1],point[2]]
+
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByY(array):
+    mirror = lambda point: [point[0],-point[1],point[2]]
+    
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByZ(array):
+    mirror = lambda point: [point[0],point[1],-point[2]]
+    
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByXY(array):
+    mirror = lambda point: [-point[0],-point[1],point[2]]
+
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByXZ(array):
+    mirror = lambda point: [-point[0],point[1],-point[2]]
+    
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByYZ(array):
+    mirror = lambda point: [point[0],-point[1],-point[2]]
+
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByXYZ(array):
+    mirror = lambda point: [-point[0],-point[1],-point[2]]
+
+    return np.apply_along_axis(mirror,1,array)
+
+def mirrorByPlanes(array, planes):
+    if planes == 'x':
+        return mirrorByX(array)
+    elif planes == 'y':
+        return mirrorByY(array)
+    elif planes == 'z':
+        return mirrorByZ(array)
+    elif planes == 'xy':
+        tmp = mirrorByX(array)
+        tmp = np.concatenate((tmp,mirrorByY(array)))
+        tmp = np.concatenate((tmp,mirrorByXY(array)))
+        return tmp
+    elif planes == 'xz':
+        tmp = mirrorByX(array)
+        tmp = np.concatenate((tmp,mirrorByZ(array)))
+        tmp = np.concatenate((tmp,mirrorByXZ(array)))
+    elif planes == 'yz':
+        tmp = mirrorByY(array)
+        tmp = np.concatenate((tmp,mirrorByZ(array)))
+        tmp = np.concatenate((tmp,mirrorByYZ(array)))
+    elif planes == 'xyz':
+        tmp = mirrorByX(array)
+        tmp = np.concatenate((tmp,mirrorByY(array)))
+        tmp = np.concatenate((tmp,mirrorByZ(array)))
+        tmp = np.concatenate((tmp,mirrorByXY(array)))
+        tmp = np.concatenate((tmp,mirrorByXZ(array)))
+        tmp = np.concatenate((tmp,mirrorByYZ(array)))
+        tmp = np.concatenate((tmp,mirrorByXYZ(array)))
+
+        return tmp
+    
+    raise(ValueError("planes must be 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'"))
 
 class CubeMarcher():
     def __init__(self):
@@ -168,11 +235,18 @@ class PointSampler():
         return x
 
 class UniformFPS():
-    def __init__(self, mesh, denseSampleSetSize):
-        print("UniformFPS.__init__")
+    def __init__(self, mesh, denseSampleSetSize, partitionPlanes):
+        print("UniformFPS.__init__(denseSampleSetSize={0}, partitionPlanes={1})".format(denseSampleSetSize, partitionPlanes))
+        if (not ((partitionPlanes is None) or partitionPlanes == '' or
+                 partitionPlanes == 'x' or partitionPlanes == 'y' or partitionPlanes == 'z' or
+                 partitionPlanes == 'xy' or partitionPlanes == 'xz' or partitionPlanes == 'yz' or
+                 partitionPlanes == 'xyz')):
+            raise(ValueError("partitionPlanes must be None, '', 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'"))
+        
         if (not mesh is None):
             self._denseSampleSetSize = denseSampleSetSize
             self._uniformSampler = PointSampler(mesh, ratio=1.0) # uniform sampling
+            self._partitionPlanes = partitionPlanes
             print("denseSamples = self._uniformSampler.sample({})".format(denseSampleSetSize))
             self._denseSamples = self._uniformSampler.sample(denseSampleSetSize)
             print("self._denseSamples.shape = {}".format(self._denseSamples.shape))
@@ -197,12 +271,27 @@ class UniformFPS():
     
     def sample(self, N):
         print("UniformFPS.sample")
+        if self._partitionPlanes == 'x' or self._partitionPlanes == 'y' or self._partitionPlanes == 'z':
+            N = N // 2
+        elif self._partitionPlanes == 'xy' or self._partitionPlanes == 'xz' or self._partitionPlanes == 'yz':
+            N = N // 4
+        elif self._partitionPlanes == 'xyz':
+            N = N // 8
+        
         if (not self._distances is None):
             x = self._fps(N)
         else:
             x = self._fpsLarge(N)
+        
         print("x.shape = {0}".format(x.shape))
         print("x[0] = {}".format(x[0]))
+        
+        if not ((self._partitionPlanes is None) or (self._partitionPlanes == '')):
+            x = np.concatenate((x, mirrorByPlanes(x, self._partitionPlanes)))
+
+        print("x.shape = {0}".format(x.shape))
+        print("x[0] = {}".format(x[0]))
+
         np.random.shuffle(x)
         print("x.shape = {0}".format(x.shape))
         return x

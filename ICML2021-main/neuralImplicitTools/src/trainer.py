@@ -86,7 +86,7 @@ def singleModelTrain(
     elif samplingMethod['type'] == 'Importance':
       pointSampler = gm.ImportanceSampler(mesh, int(config.epochLength/samplingMethod['ratio']), samplingMethod['weight'])
     elif samplingMethod['type'] == 'Uniform-FPS':
-      pointSampler = gm.UniformFPS(mesh, int(config.epochLength/samplingMethod['ratio']))
+      pointSampler = gm.UniformFPS(mesh, int(config.epochLength/samplingMethod['ratio']), samplingMethod['partitionPlanes'])
     elif samplingMethod['type'] == 'Surface-FPS':
       pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'])
     else:
@@ -192,6 +192,7 @@ def parseArgs():
   parser.add_argument('--suffix', type=str, default='')
   parser.add_argument('--gpu', type=int, default=0)
   parser.add_argument('--writeOutEpochs', type=int, default=0)
+  parser.add_argument('--partitionPlanes', type=str, default='')
   return parser.parse_args()
 
 def isMesh(fn):
@@ -260,7 +261,8 @@ if __name__ == "__main__":
     print("args.samplingMethod == 'Uniform-FPS'")
     config.samplingMethod = {
       'type': 'Uniform-FPS',
-      'ratio': 0.1
+      'ratio': 0.1,
+      'partitionPlanes': args.partitionPlanes
     }
   elif (args.samplingMethod == 'Surface-FPS'):
     print("args.samplingMethod == 'Surface-FPS'")
