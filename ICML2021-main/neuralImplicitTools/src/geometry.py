@@ -133,10 +133,11 @@ class CubeMarcher():
         return Mesh(V=V.copy(), F=F.copy(), doNormalize=False, viewer=viewer) 
 
 class PointSampler(): 
-    def __init__(self, mesh, ratio = 0.0, std=0.0, verticeSampling=False, importanceSampling=False):
+    def __init__(self, mesh, ratio = 0.0, std=0.0, verticeSampling=False, importanceSampling=False, calculateNormals=False):
         self._V = iglhelpers.e2p(mesh.V())
         self._F = iglhelpers.e2p(mesh.F())
         self._sampleVertices = verticeSampling
+        self._calculateNormals = calculateNormals
 
         if ratio < 0 or ratio > 1:
             raise(ValueError("Ratio must be [0,1]"))
@@ -152,11 +153,20 @@ class PointSampler():
     
     def _calculateFaceBins(self):
         """Calculates and saves face area bins for sampling against"""
+
+        print("self._V.shape = {}".format(self._V.shape))
+        print("self._F.shape = {}".format(self._F.shape))
+
         vc = np.cross(
             self._V[self._F[:, 0], :] - self._V[self._F[:, 2], :],
             self._V[self._F[:, 1], :] - self._V[self._F[:, 2], :])
-
+        
         A = np.sqrt(np.sum(vc ** 2, 1))
+        
+        if self._calculateNormals:
+            self._facesNorms = vc / A[:,None]
+            print("self._facesNorms.shape = {}".format(self._facesNorms.shape))
+        
         FA = A / np.sum(A)
         self._faceBins = np.concatenate(([0],np.cumsum(FA))) 
 
@@ -171,12 +181,20 @@ class PointSampler():
         A = self._V[self._F[sampleFaceIdxs, 0], :]
         B = self._V[self._F[sampleFaceIdxs, 1], :]
         C = self._V[self._F[sampleFaceIdxs, 2], :]
+
+        if self._calculateNormals:
+            Normals = self._facesNorms[sampleFaceIdxs,:]
+            print("Normals.shape = {}".format(Normals.shape))
+        
         P = (1 - np.sqrt(r[:,0:1])) * A \
                 + np.sqrt(r[:,0:1]) * (1 - r[:,1:]) * B \
                 + np.sqrt(r[:,0:1]) * r[:,1:] * C
-
-        return P
-
+        
+        if self._calculateNormals:
+            return P, Normals
+        else:
+            return P
+    
     def _verticeSamples(self, n):
         """Returns n random vertices of mesh"""
         verts = np.random.choice(len(self._V), n)
@@ -215,24 +233,42 @@ class PointSampler():
 
         if nSurface > 0:
             if self._sampleVertices:
+                if self._calculateNormals:
+                    raise "Todavía no puedo samplear vertices si uso normales"
                 # for comparison later :)
                 xSurface = self._verticeSamples(nSurface)
             else:
-                xSurface = self._surfaceSamples(nSurface)
-
-            xSurface = self._normalDist(xSurface)
+                if self._calculateNormals:
+                    xSurface, normals = self._surfaceSamples(nSurface)
+                else:
+                    xSurface = self._surfaceSamples(nSurface)
+            
+            if not self._calculateNormals:
+                xSurface = self._normalDist(xSurface)
+            
             if nRandom > 0:
+                if self._calculateNormals:
+                    raise "No puedo usar random si uso normales"
                 x = np.concatenate((xSurface,xRandom))
             else:
                 x = xSurface
         else:
+            if self._calculateNormals:
+                raise "No puedo usar random si uso normales"
             x = xRandom
 
         print("x.shape = {0}".format(x.shape))
         print("x[0] = {0}".format(x[0]))
-        np.random.shuffle(x)    #remove bias on order
-        print("x.shape = {0}".format(x.shape))
-        return x
+        
+        if not self._calculateNormals:
+            np.random.shuffle(x)    #remove bias on order
+            print("x.shape = {0}".format(x.shape))
+            return x
+        else:
+            print("normals.shape = {0}".format(normals.shape))
+            print("normals[0] = {0}".format(normals[0]))
+
+            return x, normals
 
 class UniformFPS():
     def __init__(self, mesh, denseSampleSetSize, partitionPlanes):
@@ -470,29 +506,42 @@ class UniformFPS():
         return distancesSq
 
 class SurfaceFPS():
-    def __init__(self, mesh, denseSampleSetSize, uniform_surface_ratio, std=0.0):
+    def __init__(self, mesh, denseSampleSetSize, uniform_surface_ratio, std=0.0, useNormals=False):
         print("SurfaceFPS.__init__")
 
         if std < 0.0 or std > 1.0:
             raise(ValueError("Normal deviation must be [0,1]"))
-
+        
         if (not mesh is None):
             self._denseSampleSetSize = denseSampleSetSize
             self._uniform_surface_ratio = uniform_surface_ratio
             self._std = std
-            self._surfaceSampler = PointSampler(mesh, ratio=0.0) # surface sampling
-            print("denseSamples = self._surfaceSampler.sample({})".format(denseSampleSetSize))
-            self._denseSamples = self._surfaceSampler.sample(denseSampleSetSize)
+            self._useNormals = useNormals
+            self._surfaceSampler = PointSampler(mesh, ratio=0.0, calculateNormals=self._useNormals) # surface sampling
+            self._normals = None
+
+            if self._useNormals:
+                print("denseSamples, normals = self._surfaceSampler.sample({})".format(denseSampleSetSize))
+                self._denseSamples, self._normals = self._surfaceSampler.sample(denseSampleSetSize)
+            else:
+                print("denseSamples = self._surfaceSampler.sample({})".format(denseSampleSetSize))
+                self._denseSamples = self._surfaceSampler.sample(denseSampleSetSize)
+            
             print("self._denseSamples.shape = {}".format(self._denseSamples.shape))
             print("self._denseSamples[0] = {}".format(self._denseSamples[0]))
-            if (denseSampleSetSize <= 10000):
-                self._distances = self._getDistanceMatrix(self._denseSamples)
-                #self._distancesInDisk = False
-                print("self._distances.shape = {}".format(self._distances.shape))
-                print("self._distances[0] = {}".format(self._distances[0]))
+
+            if self._useNormals:
+                print("self._normals.shape = {}".format(self._normals.shape))
+                print("self._normals[0] = {}".format(self._normals[0]))
             else:
-                self._distances = None
-                #self._distancesInDisk = True
+                print("self._normals = {}".format(self._normals))
+            
+            self._distances = None
+
+            #if (denseSampleSetSize <= 10000):
+                #self._distances = self._getDistanceMatrix(self._denseSamples)
+                #print("self._distances.shape = {}".format(self._distances.shape))
+                #print("self._distances[0] = {}".format(self._distances[0]))
             
             #print("self._distancesInDisk = {}".format(self._distancesInDisk))
                 
@@ -500,7 +549,7 @@ class SurfaceFPS():
     def _getDistanceMatrix(self, X, metric='euclidean'):
         print("getDistanceMatrix")
         print("X.shape = {0}".format(X.shape))
-
+        
         return pairwise_distances(X, metric=metric)
     
     def _normalDist(self, V):
@@ -636,10 +685,14 @@ class SurfaceFPS():
         perm[0] = self._denseSamples[0]
         
         ds = np.zeros(self._denseSamples.shape[0])
-        print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
         #print('ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")')
 
-        numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
+        if self._normals is None:
+            print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
+            numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
+        else:
+            print("numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals, ds)")
+            numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals, ds)
         #ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")
 
         tmp = np.zeros(self._denseSamples.shape[0])
@@ -672,11 +725,17 @@ class SurfaceFPS():
             #idx = numba_aux.argmax2(ds)
             perm[i] = self._denseSamples[idx]
             if ((i % 1000) == 0):
-                print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
+                if self._normals is None:
+                    print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
+                else:
+                    print("numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals, tmp)")
                 #print('tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")')
                 start_distance = time.time()
             
-            numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
+            if self._normals is None:
+                numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
+            else:
+                numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals, tmp)
             #tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")
 
             if ((i % 1000) == 0):

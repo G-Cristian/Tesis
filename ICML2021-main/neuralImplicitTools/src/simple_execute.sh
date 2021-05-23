@@ -1,6 +1,6 @@
 #!/bin/bash
 
-prefix_name="Uniform-FPS"
+prefix_name="Surface-FPS"
 date_time=$(date +"%Y_%m_%d_%H_%M_%S")
 
 name=$prefix_name'_'$date_time

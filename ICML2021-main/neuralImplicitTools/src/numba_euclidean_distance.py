@@ -91,6 +91,32 @@ def pytho_call_euclidean_distance_from_point(point, array, output, threads_per_b
     euclidean_distance_from_point[blocks_per_grid, threads_per_block](array, point, output)
 
 @cuda.jit
+def euclidean_distance_from_point_variation(i_array_1, point, normals_array_1, normal_point, o_array):
+    block = cuda.blockIdx.x
+    thread = cuda.threadIdx.x
+    block_dim = cuda.blockDim.x
+    pos = thread + block*block_dim
+    if pos < len(o_array):
+        x = i_array_1[pos][0] - point[0]
+        y = i_array_1[pos][1] - point[1]
+        z = i_array_1[pos][2] - point[2]
+        #cosAngle = normal_point.dot(normals_array_1[pos])
+        cosAngle = normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2]
+        o_array[pos] = (x * x + y * y + z * z) / (cosAngle + 0.0001)
+
+    #cuda.syncthreads()
+
+def pytho_call_euclidean_distance_from_point_variation(point, array, pointNormal, arrayNormals, output, threads_per_block=1024):
+    if not (array.shape[0] == output.shape[0]):
+        print("array.shape[0] must equal output.shape[0]")
+        return
+    # TODO: chequear que el tamaño de array[0] y point sea igual a 3
+
+    blocks_per_grid = (array.shape[0] + (threads_per_block - 1)) // threads_per_block
+    euclidean_distance_from_point_variation[blocks_per_grid, threads_per_block](array, point, arrayNormals, pointNormal, output)
+
+
+@cuda.jit
 def numba_arg_max(array, originalIndices, outputIndices, mid, end):
     block = cuda.blockIdx.x
     thread = cuda.threadIdx.x

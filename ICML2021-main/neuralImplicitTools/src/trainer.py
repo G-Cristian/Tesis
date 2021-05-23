@@ -88,7 +88,7 @@ def singleModelTrain(
     elif samplingMethod['type'] == 'Uniform-FPS':
       pointSampler = gm.UniformFPS(mesh, int(config.epochLength/samplingMethod['ratio']), samplingMethod['partitionPlanes'])
     elif samplingMethod['type'] == 'Surface-FPS':
-      pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'])
+      pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'], useNormals=True)
     else:
       raise("uhhhh")
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     config.samplingMethod = {
       'type': 'Surface-FPS',
       'std': 0.01,
-      'ratio': 0.2
+      'ratio': 0.1
     }
   else:
     print("INVALID SAMPLING METHOD EXITING")
