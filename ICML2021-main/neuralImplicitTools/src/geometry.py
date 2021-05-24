@@ -506,9 +506,15 @@ class UniformFPS():
         return distancesSq
 
 class SurfaceFPS():
-    def __init__(self, mesh, denseSampleSetSize, uniform_surface_ratio, std=0.0, useNormals=False):
-        print("SurfaceFPS.__init__")
+    def __init__(self, mesh, denseSampleSetSize, uniform_surface_ratio, std, useNormals, partitionPlanes):
+        print("SurfaceFPS.__init__(denseSampleSetSize={0}, uniform_surface_ratio = {1}, std={2}, useNormals={3}, partitionPlanes={4})".format(denseSampleSetSize, uniform_surface_ratio, std, useNormals, partitionPlanes))
 
+        if (not ((partitionPlanes is None) or partitionPlanes == '' or
+                  partitionPlanes == 'x' or partitionPlanes == 'y' or partitionPlanes == 'z' or
+                  partitionPlanes == 'xy' or partitionPlanes == 'xz' or partitionPlanes == 'yz' or
+                  partitionPlanes == 'xyz')):
+            raise(ValueError("partitionPlanes must be None, '', 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'"))
+        
         if std < 0.0 or std > 1.0:
             raise(ValueError("Normal deviation must be [0,1]"))
         
@@ -517,6 +523,7 @@ class SurfaceFPS():
             self._uniform_surface_ratio = uniform_surface_ratio
             self._std = std
             self._useNormals = useNormals
+            self._partitionPlanes = partitionPlanes
             self._surfaceSampler = PointSampler(mesh, ratio=0.0, calculateNormals=self._useNormals) # surface sampling
             self._normals = None
 
@@ -582,6 +589,9 @@ class SurfaceFPS():
         nSurface = n - nRandom
 
         xRandom = self._randomSamples(nRandom)
+        
+        if not ((self._partitionPlanes is None) or (self._partitionPlanes == '')):
+            xRandom = np.concatenate((xRandom, mirrorByPlanes(xRandom, self._partitionPlanes)))
 
         if nSurface > 0:
             if (not self._distances is None):
@@ -589,7 +599,11 @@ class SurfaceFPS():
             else:
                 xSurface = self._fpsLarge(nSurface)
             
+            if not ((self._partitionPlanes is None) or (self._partitionPlanes == '')):
+                xSurface = np.concatenate((xSurface, mirrorByPlanes(xSurface, self._partitionPlanes)))
+            
             xSurface = self._normalDist(xSurface)
+            
             if nRandom > 0:
                 x = np.concatenate((xSurface,xRandom))
             else:
@@ -599,6 +613,7 @@ class SurfaceFPS():
         
         print("x.shape = {0}".format(x.shape))
         print("x[0] = {}".format(x[0]))
+
         np.random.shuffle(x)
         print("x.shape = {0}".format(x.shape))
 

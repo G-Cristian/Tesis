@@ -88,7 +88,7 @@ def singleModelTrain(
     elif samplingMethod['type'] == 'Uniform-FPS':
       pointSampler = gm.UniformFPS(mesh, int(config.epochLength/samplingMethod['ratio']), samplingMethod['partitionPlanes'])
     elif samplingMethod['type'] == 'Surface-FPS':
-      pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'], useNormals=True)
+      pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'], useNormals=True, partitionPlanes=config.partitionPlanes)
     else:
       raise("uhhhh")
 
@@ -239,6 +239,7 @@ if __name__ == "__main__":
   config.lossType = args.loss
   config.queryPath = args.queryPath
   config.saveWeightsEveryEpoch = args.writeOutEpochs
+  config.partitionPlanes = args.partitionPlanes
 
   if (args.samplingMethod == 'Importance'):
     print("Importance Sampling!")
