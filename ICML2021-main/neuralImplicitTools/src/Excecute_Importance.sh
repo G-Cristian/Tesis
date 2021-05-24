@@ -66,6 +66,10 @@ done
 #echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."  >> "$logfile"
 #echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."  >> "$completeLogfile"
 
+#echo "python3 metrics.py $outputDir ../data/"
+#echo "python3 metrics.py $outputDir ../data/" >> "$logfile"
+#echo "python3 metrics.py $outputDir ../data/" >> "$completeLogfile"
+
 #python3 metrics.py $outputDir ../data/ >> "$completeLogfile"
 
 #echo "... Fin ejecutando metrics.py -- $(date +"%Y_%m_%d_%H_%M_%S") --"
