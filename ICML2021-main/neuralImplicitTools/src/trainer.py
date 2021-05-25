@@ -18,7 +18,9 @@ from tqdm import tqdm
 
 import h5py
 
-def createSequences(sdf, grid, pointSampler, batchSize, epochLength=10**6, reuseEpoch=True, useSphericalCoordinates=False):
+import matplotlib.pyplot as plt
+
+def createSequences(sdf, grid, pointSampler, batchSize, epochLength=10**6, reuseEpoch=True, useSphericalCoordinates=False, outputDir = '', meshName=''):
   print("createSequences")
   if reuseEpoch:
     # We just precompute one epoch and reuse each time!
@@ -28,6 +30,17 @@ def createSequences(sdf, grid, pointSampler, batchSize, epochLength=10**6, reuse
     print("S = sdf.query(queryPts)")
     S = sdf.query(queryPts)
     print("Fin S = sdf.query(queryPts)")
+
+    print("Plot queryPts")
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.scatter(queryPts[:,0], queryPts[:,1], queryPts[:,2], marker='o')
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    
+    plt.savefig(os.path.join(outputDir,meshName + '.jpg'))
 
     trainData = np.concatenate((queryPts,S), axis = 1)
 
@@ -94,7 +107,7 @@ def singleModelTrain(
 
     # create data sequences
     validationGrid = cubeMarcher.createGrid(config.validationRes) if config.validationRes > 0 else None
-    sdfTrain, sdfEval = createSequences(sdf, validationGrid, pointSampler, config.batchSize, config.epochLength)
+    sdfTrain, sdfEval = createSequences(sdf, validationGrid, pointSampler, config.batchSize, config.epochLength, outputDir=outputDir, meshName= config.name)
 
   elif (not precomputedFn is None) :
     # precomputed!
