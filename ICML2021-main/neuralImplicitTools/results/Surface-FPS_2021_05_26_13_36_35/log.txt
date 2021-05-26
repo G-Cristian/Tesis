@@ -1,0 +1,20 @@
+Inicio -- 2021_05_26_13_36_35 --
+Ejecutando trainer.py para ../dataset_01_03/32770.stl (2021_05_26_13_36_35) ...
+python3 trainer.py ../dataset_01_03/../dataset_01_03/32770.stl --outputDir ../results/Surface-FPS_2021_05_26_13_36_35 --samplingMethod Surface-FPS --epochLengthPow 5
+... Fin ejecutando trainer.py para ../dataset_01_03/32770.stl -- 2021_05_26_15_40_27 --
+Ejecutando modelmesher.py para ../dataset_01_03/32770.stl (2021_05_26_15_40_27) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_05_26_13_36_35
+... Fin ejecutando modelmesher.py para ../dataset_01_03/32770.stl -- 2021_05_26_15_41_34 --
+Ejecutando trainer.py para ../dataset_01_03/34783.stl (2021_05_26_15_41_34) ...
+python3 trainer.py ../dataset_01_03/../dataset_01_03/34783.stl --outputDir ../results/Surface-FPS_2021_05_26_13_36_35 --samplingMethod Surface-FPS --epochLengthPow 5
+... Fin ejecutando trainer.py para ../dataset_01_03/34783.stl -- 2021_05_26_17_46_40 --
+Ejecutando modelmesher.py para ../dataset_01_03/34783.stl (2021_05_26_17_46_40) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_05_26_13_36_35
+... Fin ejecutando modelmesher.py para ../dataset_01_03/34783.stl -- 2021_05_26_17_48_46 --
+Ejecutando trainer.py para ../dataset_01_03/34784.stl (2021_05_26_17_48_46) ...
+python3 trainer.py ../dataset_01_03/../dataset_01_03/34784.stl --outputDir ../results/Surface-FPS_2021_05_26_13_36_35 --samplingMethod Surface-FPS --epochLengthPow 5
+... Fin ejecutando trainer.py para ../dataset_01_03/34784.stl -- 2021_05_26_19_55_12 --
+Ejecutando modelmesher.py para ../dataset_01_03/34784.stl (2021_05_26_19_55_12) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_05_26_13_36_35
+... Fin ejecutando modelmesher.py para ../dataset_01_03/34784.stl -- 2021_05_26_19_58_22 --
+Fin -- 2021_05_26_19_58_22 --
