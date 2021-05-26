@@ -32,15 +32,15 @@ def createSequences(sdf, grid, pointSampler, batchSize, epochLength=10**6, reuse
     print("Fin S = sdf.query(queryPts)")
 
     print("Plot queryPts")
-    fig = plt.figure()
+    fig = plt.figure(figsize=(40, 40))
     ax = fig.add_subplot(projection='3d')
-    ax.scatter(queryPts[:,0], queryPts[:,1], queryPts[:,2], marker='o')
+    ax.scatter(queryPts[:,0], queryPts[:,1], queryPts[:,2], s=4, marker='o')
     
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     
-    plt.savefig(os.path.join(outputDir,meshName + '.jpg'))
+    plt.savefig(os.path.join(outputDir,meshName + '.png'))
 
     trainData = np.concatenate((queryPts,S), axis = 1)
 
