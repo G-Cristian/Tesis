@@ -1,6 +1,8 @@
 from numba import cuda
 import numpy
 
+import time
+
 def host_func(val):
     print(val)
 
@@ -90,6 +92,11 @@ def pytho_call_euclidean_distance_from_point(point, array, output, threads_per_b
     blocks_per_grid = (array.shape[0] + (threads_per_block - 1)) // threads_per_block
     euclidean_distance_from_point[blocks_per_grid, threads_per_block](array, point, output)
 
+def numpy_euclidean_distance_from_point(point, array, output):
+    points = numpy.full(array.shape, point)
+    output = array - points
+    output = numpy.sum(output*output, axis=1)
+
 @cuda.jit
 def euclidean_distance_from_point_variation(i_array_1, point, normals_array_1, normal_point, o_array):
     block = cuda.blockIdx.x
@@ -115,6 +122,15 @@ def pytho_call_euclidean_distance_from_point_variation(point, array, pointNormal
     blocks_per_grid = (array.shape[0] + (threads_per_block - 1)) // threads_per_block
     euclidean_distance_from_point_variation[blocks_per_grid, threads_per_block](array, point, arrayNormals, pointNormal, output)
 
+def numpy_euclidean_distance_from_point_variation(point, array, pointNormal, arrayNormals, output):
+    points = numpy.full(array.shape, point)
+    output = array - points
+    output = numpy.sum(output*output, axis=1)
+
+    absCosAngles = numpy.full(arrayNormals.shape, pointNormal)
+    absCosAngles = numpy.sum(arrayNormals * absCosAngles, axis=1) + 0.0001
+    
+    output = output/absCosAngles
 
 @cuda.jit
 def numba_arg_max(array, originalIndices, outputIndices, mid, end):
@@ -222,14 +238,37 @@ if __name__ == "__main__":
 
     #normalize_sq_seq[blocks_per_grid, threads_per_block](data, output)
     #euclidean_distance[blocks_per_grid, threads_per_block](data, data2, output)
-    #pytho_call_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)
+    print("pytho_call_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)")
+    start_time = time.time()
+    pytho_call_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)
+    end_time = time.time()
+    print("elapsed time={0}".format(end_time-start_time))
+
+    print("numpy_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)")
+    start_time = time.time()
+    numpy_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)
+    end_time = time.time()
+    print("elapsed time={0}".format(end_time-start_time))
+
+    print("pytho_call_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, output)")
+    start_time = time.time()
+    pytho_call_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, numpy.array([2,4,8]), data, output)
+    end_time = time.time()
+    print("elapsed time={0}".format(end_time-start_time))
+
+    print("numpy_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, output)")
+    start_time = time.time()
+    numpy_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, numpy.array([2,4,8]), data, output)
+    end_time = time.time()
+    print("elapsed time={0}".format(end_time-start_time))
+
     #min_between_arrays_store_in_first[blocks_per_grid, threads_per_block](data, data2)
     #maxIdx = argmax(data3, data2, tmpIndices)
     #pytho_call_min_between_arrays_store_in_first(data2, data3)
     
-    print("data.shape = {}".format(data.shape))
-    print("data2.shape = {}".format(data2.shape))
+    #print("data.shape = {}".format(data.shape))
+    #print("data2.shape = {}".format(data2.shape))
     #print_array(data)
     #print("maxIdx = {0}, maxVal = {1}".format(maxIdx, data3[maxIdx]))
-    maxIdx_2 = argmax2(data3)
-    print("maxIdx_2 = {0}, maxVal_2 = {1}".format(maxIdx_2, data3[maxIdx_2]))
+    #maxIdx_2 = argmax2(data3)
+    #print("maxIdx_2 = {0}, maxVal_2 = {1}".format(maxIdx_2, data3[maxIdx_2]))
