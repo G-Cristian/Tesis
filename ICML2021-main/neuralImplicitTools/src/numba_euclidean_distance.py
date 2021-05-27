@@ -92,10 +92,10 @@ def pytho_call_euclidean_distance_from_point(point, array, output, threads_per_b
     blocks_per_grid = (array.shape[0] + (threads_per_block - 1)) // threads_per_block
     euclidean_distance_from_point[blocks_per_grid, threads_per_block](array, point, output)
 
-def numpy_euclidean_distance_from_point(point, array, output):
+def numpy_euclidean_distance_from_point(point, array):
     points = numpy.full(array.shape, point)
     output = array - points
-    output = numpy.sum(output*output, axis=1)
+    return numpy.sum(output*output, axis=1)
 
 @cuda.jit
 def euclidean_distance_from_point_variation(i_array_1, point, normals_array_1, normal_point, o_array):
@@ -122,15 +122,15 @@ def pytho_call_euclidean_distance_from_point_variation(point, array, pointNormal
     blocks_per_grid = (array.shape[0] + (threads_per_block - 1)) // threads_per_block
     euclidean_distance_from_point_variation[blocks_per_grid, threads_per_block](array, point, arrayNormals, pointNormal, output)
 
-def numpy_euclidean_distance_from_point_variation(point, array, pointNormal, arrayNormals, output):
+def numpy_euclidean_distance_from_point_variation(point, array, pointNormal, arrayNormals):
     points = numpy.full(array.shape, point)
     output = array - points
     output = numpy.sum(output*output, axis=1)
 
     absCosAngles = numpy.full(arrayNormals.shape, pointNormal)
-    absCosAngles = numpy.sum(arrayNormals * absCosAngles, axis=1) + 0.0001
-    
-    output = output/absCosAngles
+    absCosAngles = numpy.abs(numpy.sum(arrayNormals * absCosAngles, axis=1)) + 0.0001
+
+    return output/absCosAngles
 
 @cuda.jit
 def numba_arg_max(array, originalIndices, outputIndices, mid, end):
@@ -209,7 +209,7 @@ def print_array(i_array):
         i+=1
 
 if __name__ == "__main__":
-    size = 10000000
+    size = 1000000
     print(cuda.gpus)
     data = numpy.tile(numpy.array([1,2,3]),(size,1))
     #data = numpy.array([4,0,1,2])
@@ -220,6 +220,7 @@ if __name__ == "__main__":
     data3 = numpy.arange(size)
 
     output = numpy.zeros(size)
+    output2 = numpy.zeros(size)
     #tmpIndices = numpy.zeros(size, dtype=numpy.uint64)
     tmpIndices = numpy.zeros((size + 1) // 2, dtype=numpy.uint64)
 
@@ -240,28 +241,32 @@ if __name__ == "__main__":
     #euclidean_distance[blocks_per_grid, threads_per_block](data, data2, output)
     print("pytho_call_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)")
     start_time = time.time()
-    pytho_call_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)
+    pytho_call_euclidean_distance_from_point(numpy.array([2.,4.,8.]), data, output)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    #print(output)
 
     print("numpy_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)")
     start_time = time.time()
-    numpy_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)
+    output = numpy_euclidean_distance_from_point(numpy.array([2.,4.,8.]), data)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    #print(output)
 
     print("pytho_call_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, output)")
     start_time = time.time()
-    pytho_call_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, numpy.array([2,4,8]), data, output)
+    pytho_call_euclidean_distance_from_point_variation(numpy.array([2.,4.,8.]), data, numpy.array([-2.,-4.,-8.]), data, output)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    #print(output)
 
     print("numpy_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, output)")
     start_time = time.time()
-    numpy_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, numpy.array([2,4,8]), data, output)
+    output = numpy_euclidean_distance_from_point_variation(numpy.array([2.,4.,8.]), data, numpy.array([-2.,-4.,-8.]), data)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
-
+    #print(output)
+    
     #min_between_arrays_store_in_first[blocks_per_grid, threads_per_block](data, data2)
     #maxIdx = argmax(data3, data2, tmpIndices)
     #pytho_call_min_between_arrays_store_in_first(data2, data3)
