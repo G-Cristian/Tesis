@@ -101,7 +101,7 @@ def singleModelTrain(
     elif samplingMethod['type'] == 'Uniform-FPS':
       pointSampler = gm.UniformFPS(mesh, int(config.epochLength/samplingMethod['ratio']), samplingMethod['partitionPlanes'])
     elif samplingMethod['type'] == 'Surface-FPS':
-      pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'], useNormals=True, partitionPlanes=config.partitionPlanes)
+      pointSampler = gm.SurfaceFPS(mesh, int(config.epochLength * (1.0 - samplingMethod['ratio']) * 10 ), samplingMethod['ratio'], std = samplingMethod['std'], useNormals=samplingMethod['useNormals'], partitionPlanes=config.partitionPlanes)
     else:
       raise("uhhhh")
 
@@ -206,6 +206,7 @@ def parseArgs():
   parser.add_argument('--gpu', type=int, default=0)
   parser.add_argument('--writeOutEpochs', type=int, default=0)
   parser.add_argument('--partitionPlanes', type=str, default='')
+  parser.add_argument('--useNormals', type=int, default=True, help='use normals to weight distances in Surface-FPS')
   return parser.parse_args()
 
 def isMesh(fn):
@@ -253,6 +254,12 @@ if __name__ == "__main__":
   config.queryPath = args.queryPath
   config.saveWeightsEveryEpoch = args.writeOutEpochs
   config.partitionPlanes = args.partitionPlanes
+  if args.useNormals == True or args.useNormals == 1:
+    config.useNormals = True
+  elif args.useNormals == False or args.useNormals == 0:
+    config.useNormals = False
+  else:
+    raise "--useNormals must be 0 (False) or 1 (True)"
 
   if (args.samplingMethod == 'Importance'):
     print("Importance Sampling!")
@@ -283,7 +290,8 @@ if __name__ == "__main__":
     config.samplingMethod = {
       'type': 'Surface-FPS',
       'std': 0.01,
-      'ratio': 0.1
+      'ratio': 0.1,
+      'useNormals': config.useNormals
     }
   else:
     print("INVALID SAMPLING METHOD EXITING")
