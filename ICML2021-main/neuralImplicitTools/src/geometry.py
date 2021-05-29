@@ -277,7 +277,7 @@ class UniformFPS():
                  partitionPlanes == 'x' or partitionPlanes == 'y' or partitionPlanes == 'z' or
                  partitionPlanes == 'xy' or partitionPlanes == 'xz' or partitionPlanes == 'yz' or
                  partitionPlanes == 'xyz')):
-            raise(ValueError("partitionPlanes must be None, '', 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'"))
+            raise(ValueError("partitionPlanes must be None, '', 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'. Found {0}".format(partitionPlanes)))
         
         if (not mesh is None):
             self._denseSampleSetSize = denseSampleSetSize
@@ -518,7 +518,7 @@ class SurfaceFPS():
                   partitionPlanes == 'x' or partitionPlanes == 'y' or partitionPlanes == 'z' or
                   partitionPlanes == 'xy' or partitionPlanes == 'xz' or partitionPlanes == 'yz' or
                   partitionPlanes == 'xyz')):
-            raise(ValueError("partitionPlanes must be None, '', 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'"))
+            raise(ValueError("partitionPlanes must be None, '', 'x', 'y', 'z', 'xy', 'xz', 'yz' or 'xyz'. Found {0}".format(partitionPlanes)))
         
         if std < 0.0 or std > 1.0:
             raise(ValueError("Normal deviation must be [0,1]"))
