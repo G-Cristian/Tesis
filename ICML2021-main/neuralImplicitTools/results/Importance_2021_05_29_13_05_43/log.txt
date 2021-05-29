@@ -1,0 +1,23 @@
+Inicio -- 2021_05_29_13_05_43 --
+Ejecutando trainer.py para ../dataset_01_03/32770.stl (2021_05_29_13_05_43) ...
+python3 trainer.py ../dataset_01_03/../dataset_01_03/32770.stl --outputDir ../results/Importance_2021_05_29_13_05_43 --samplingMethod Importance --epochLengthPow 6
+... Fin ejecutando trainer.py para ../dataset_01_03/32770.stl -- 2021_05_29_13_50_39 --
+Ejecutando modelmesher.py para ../dataset_01_03/32770.stl (2021_05_29_13_50_39) ...
+python3 modelmesher.py ../results/Importance_2021_05_29_13_05_43
+... Fin ejecutando modelmesher.py para ../dataset_01_03/32770.stl -- 2021_05_29_13_51_48 --
+Ejecutando trainer.py para ../dataset_01_03/34783.stl (2021_05_29_13_51_48) ...
+python3 trainer.py ../dataset_01_03/../dataset_01_03/34783.stl --outputDir ../results/Importance_2021_05_29_13_05_43 --samplingMethod Importance --epochLengthPow 6
+... Fin ejecutando trainer.py para ../dataset_01_03/34783.stl -- 2021_05_29_15_59_39 --
+Ejecutando modelmesher.py para ../dataset_01_03/34783.stl (2021_05_29_15_59_39) ...
+python3 modelmesher.py ../results/Importance_2021_05_29_13_05_43
+... Fin ejecutando modelmesher.py para ../dataset_01_03/34783.stl -- 2021_05_29_16_01_48 --
+Ejecutando trainer.py para ../dataset_01_03/34784.stl (2021_05_29_16_01_48) ...
+python3 trainer.py ../dataset_01_03/../dataset_01_03/34784.stl --outputDir ../results/Importance_2021_05_29_13_05_43 --samplingMethod Importance --epochLengthPow 6
+... Fin ejecutando trainer.py para ../dataset_01_03/34784.stl -- 2021_05_29_18_15_58 --
+Ejecutando modelmesher.py para ../dataset_01_03/34784.stl (2021_05_29_18_15_58) ...
+python3 modelmesher.py ../results/Importance_2021_05_29_13_05_43
+... Fin ejecutando modelmesher.py para ../dataset_01_03/34784.stl -- 2021_05_29_18_19_10 --
+Ejecutando metrics.py (2021_05_29_18_19_10) ...
+python3 metrics.py ../results/Importance_2021_05_29_13_05_43 ../dataset_01_03 --meshExt stl
+... Fin ejecutando metrics.py -- 2021_05_29_19_22_51 --
+Fin -- 2021_05_29_19_22_51 --
