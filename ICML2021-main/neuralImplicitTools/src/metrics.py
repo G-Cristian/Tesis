@@ -29,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument('meshPath', help='path to corresponding mesh geometries.') 
     parser.add_argument('--archPath', default=None)
     parser.add_argument('--res', default=128, type=int)
+    parser.add_argument('--meshExt', default='obj', type=str, help="Extension of mesh geometries.")
     args = parser.parse_args()
 
     trainedModels = list([f.split('.h5')[0] for f in os.listdir(args.weightPath) if '.h5' in f])
@@ -37,14 +38,14 @@ if __name__ == "__main__":
     
     uniformGrid = cubeMarcher.createGrid(args.res)
 
-    csvFile = open('results.csv', 'w')
+    csvFile = open(os.path.join(args.weightPath,'results.csv'), 'w')
 
     csvWriter = csv.writer(csvFile, delimiter=',')
     csvWriter.writerow(['Name', 'Grid Error', 'Surface Error', 'Importance Error'])
 
     for m in trainedModels:
         modelPath = os.path.join(args.weightPath, m)
-        meshPath = os.path.join(args.meshPath, "{}.obj".format(m))
+        meshPath = os.path.join(args.meshPath, "{0}.{1}".format(m, args.meshExt))
         try:
             print("[INFO] Loading model: ", m)
             sdfModel = loadModel(modelPath, archPath=args.archPath)
