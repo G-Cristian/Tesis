@@ -206,7 +206,7 @@ def parseArgs():
   parser.add_argument('--gpu', type=int, default=0)
   parser.add_argument('--writeOutEpochs', type=int, default=0)
   parser.add_argument('--partitionPlanes', type=str, default='')
-  parser.add_argument('--useNormals', type=int, default=True, help='use normals to weight distances in Surface-FPS')
+  parser.add_argument('--useNormals', type=int, default=False, help='1 to use normals for weighting distances in Surface-FPS')
   return parser.parse_args()
 
 def isMesh(fn):
