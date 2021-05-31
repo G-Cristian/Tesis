@@ -413,12 +413,12 @@ class UniformFPS():
         perm[0] = self._denseSamples[0]
         
         ds = np.zeros(self._denseSamples.shape[0])
-        #print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
-        print("ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)")
+        print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
+        #print("ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)")
         #print('ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")')
 
-        #numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
-        ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)
+        numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
+        #ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)
         #ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")
 
         tmp = np.zeros(self._denseSamples.shape[0])
@@ -451,19 +451,19 @@ class UniformFPS():
             #idx = numba_aux.argmax2(ds)
             perm[i] = self._denseSamples[idx]
             if ((i % 1000) == 0):
-                #print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
-                print("tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)")
+                print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
+                #print("tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)")
                 #print('tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")')
                 start_distance = time.time()
             
-            #numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
-            tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)
+            numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
+            #tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)
             #tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")
 
             if ((i % 1000) == 0):
                 end_distance = time.time()
-                #print("pytho_call_euclidean_distance_from_point elapsed time = {}".format(end_distance-start_distance))
-                print("numpy_euclidean_distance_from_point elapsed time = {}".format(end_distance-start_distance))
+                print("pytho_call_euclidean_distance_from_point elapsed time = {}".format(end_distance-start_distance))
+                #print("numpy_euclidean_distance_from_point elapsed time = {}".format(end_distance-start_distance))
                 #print("fastdist.vector_to_matrix_distance elapsed time = {}".format(end_distance-start_distance))
             
             if ((i % 1000) == 0):
@@ -708,15 +708,15 @@ class SurfaceFPS():
         #print('ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")')
 
         if self._normals is None:
-            #print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
-            print("ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)")
-            #numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
-            ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)
+            print("numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)")
+            #print("ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)")
+            numba_aux.pytho_call_euclidean_distance_from_point(perm[0], self._denseSamples, ds)
+            #ds = numba_aux.numpy_euclidean_distance_from_point(perm[0], self._denseSamples)
         else:
-            #print("numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals, ds)")
-            print("ds = numba_aux.numpy_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals)")
-            #numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals, ds)
-            ds = numba_aux.numpy_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals)
+            print("numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals, ds)")
+            #print("ds = numba_aux.numpy_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals)")
+            numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals, ds)
+            #ds = numba_aux.numpy_euclidean_distance_from_point_variation(perm[0], self._denseSamples, self._normals[0], self._normals)
         #ds = fastdist.vector_to_matrix_distance(perm[0], self._denseSamples, fastdist.euclidean, "euclidean")
 
         tmp = np.zeros(self._denseSamples.shape[0])
@@ -750,26 +750,26 @@ class SurfaceFPS():
             perm[i] = self._denseSamples[idx]
             if ((i % 1000) == 0):
                 if self._normals is None:
-                    #print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
-                    print("tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)")
+                    print("numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)")
+                    #print("tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)")
                 else:
-                    #print("numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals, tmp)")
-                    print("tmp = numba_aux.numpy_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals)")
+                    print("numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals, tmp)")
+                    #print("tmp = numba_aux.numpy_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals)")
                 #print('tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")')
                 start_distance = time.time()
             
             if self._normals is None:
-                #numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
-                tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)
+                numba_aux.pytho_call_euclidean_distance_from_point(perm[i], self._denseSamples, tmp)
+                #tmp = numba_aux.numpy_euclidean_distance_from_point(perm[i], self._denseSamples)
             else:
-                #numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals, tmp)
-                tmp = numba_aux.numpy_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals)
+                numba_aux.pytho_call_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals, tmp)
+                #tmp = numba_aux.numpy_euclidean_distance_from_point_variation(perm[i], self._denseSamples, self._normals[i], self._normals)
             #tmp = fastdist.vector_to_matrix_distance(perm[i], self._denseSamples, fastdist.euclidean, "euclidean")
 
             if ((i % 1000) == 0):
                 end_distance = time.time()
-                #print("pytho_call_euclidean_distance_from_point(_variation) elapsed time = {}".format(end_distance-start_distance))
-                print("numpy_euclidean_distance_from_point(_variation) elapsed time = {}".format(end_distance-start_distance))
+                print("pytho_call_euclidean_distance_from_point(_variation) elapsed time = {}".format(end_distance-start_distance))
+                #print("numpy_euclidean_distance_from_point(_variation) elapsed time = {}".format(end_distance-start_distance))
                 #print("fastdist.vector_to_matrix_distance elapsed time = {}".format(end_distance-start_distance))
             
             if ((i % 1000) == 0):
