@@ -1,0 +1,23 @@
+Inicio -- 2021_05_31_09_22_15 --
+Ejecutando trainer.py para ../dataset_04_06/34785.stl (2021_05_31_09_22_15) ...
+python3 trainer.py ../dataset_04_06/../dataset_04_06/34785.stl --outputDir ../results/Surface-FPS_2021_05_31_09_22_15 --samplingMethod Surface-FPS --epochLengthPow 5 --useNormals 0
+... Fin ejecutando trainer.py para ../dataset_04_06/34785.stl -- 2021_05_31_10_33_15 --
+Ejecutando modelmesher.py para ../dataset_04_06/34785.stl (2021_05_31_10_33_15) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_05_31_09_22_15
+... Fin ejecutando modelmesher.py para ../dataset_04_06/34785.stl -- 2021_05_31_10_34_20 --
+Ejecutando trainer.py para ../dataset_04_06/35269.stl (2021_05_31_10_34_20) ...
+python3 trainer.py ../dataset_04_06/../dataset_04_06/35269.stl --outputDir ../results/Surface-FPS_2021_05_31_09_22_15 --samplingMethod Surface-FPS --epochLengthPow 5 --useNormals 0
+... Fin ejecutando trainer.py para ../dataset_04_06/35269.stl -- 2021_05_31_10_34_23 --
+Ejecutando modelmesher.py para ../dataset_04_06/35269.stl (2021_05_31_10_34_23) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_05_31_09_22_15
+... Fin ejecutando modelmesher.py para ../dataset_04_06/35269.stl -- 2021_05_31_10_35_31 --
+Ejecutando trainer.py para ../dataset_04_06/36069.stl (2021_05_31_10_35_31) ...
+python3 trainer.py ../dataset_04_06/../dataset_04_06/36069.stl --outputDir ../results/Surface-FPS_2021_05_31_09_22_15 --samplingMethod Surface-FPS --epochLengthPow 5 --useNormals 0
+... Fin ejecutando trainer.py para ../dataset_04_06/36069.stl -- 2021_05_31_10_35_34 --
+Ejecutando modelmesher.py para ../dataset_04_06/36069.stl (2021_05_31_10_35_34) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_05_31_09_22_15
+... Fin ejecutando modelmesher.py para ../dataset_04_06/36069.stl -- 2021_05_31_10_36_39 --
+Ejecutando metrics.py (2021_05_31_10_36_39) ...
+python3 metrics.py ../results/Surface-FPS_2021_05_31_09_22_15 ../dataset_04_06 --meshExt stl
+... Fin ejecutando metrics.py -- 2021_05_31_10_48_40 --
+Fin -- 2021_05_31_10_48_40 --
