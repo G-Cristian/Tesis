@@ -2,6 +2,7 @@ from numba import cuda
 import numpy
 
 import time
+import math
 
 def host_func(val):
     print(val)
@@ -108,8 +109,10 @@ def euclidean_distance_from_point_variation(i_array_1, point, normals_array_1, n
         y = i_array_1[pos][1] - point[1]
         z = i_array_1[pos][2] - point[2]
         #cosAngle = normal_point.dot(normals_array_1[pos])
-        absCosAngle = abs(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2])
-        o_array[pos] = (x * x + y * y + z * z) / (absCosAngle + 0.0001)
+        #absCosAngle = abs(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2])
+        ePowCosAngle = math.e**(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2])
+        #o_array[pos] = (x * x + y * y + z * z) / (absCosAngle + 0.0001)
+        o_array[pos] = (x * x + y * y + z * z) / (ePowCosAngle)
 
     #cuda.syncthreads()
 
@@ -128,9 +131,11 @@ def numpy_euclidean_distance_from_point_variation(point, array, pointNormal, arr
     output = numpy.sum(output*output, axis=1)
 
     absCosAngles = numpy.full(arrayNormals.shape, pointNormal)
-    absCosAngles = numpy.abs(numpy.sum(arrayNormals * absCosAngles, axis=1)) + 0.0001
+    #absCosAngles = numpy.abs(numpy.sum(arrayNormals * absCosAngles, axis=1)) + 0.0001
+    ePowCosAngle = numpy.power(math.e, numpy.sum(arrayNormals * absCosAngles, axis=1))
 
-    return output/absCosAngles
+    #return output/absCosAngles
+    return output/ePowCosAngle
 
 @cuda.jit
 def numba_arg_max(array, originalIndices, outputIndices, mid, end):
