@@ -291,6 +291,7 @@ if __name__ == "__main__":
       'type': 'Surface-FPS',
       'std': 0.01,
       'ratio': 0.1,
+      #'ratio': 0.0,
       'useNormals': config.useNormals
     }
   else:

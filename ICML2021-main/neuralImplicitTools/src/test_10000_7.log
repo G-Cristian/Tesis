@@ -1,0 +1,48 @@
+Inicio -- 2021_05_19_12_51_46 --
+Creando carpeta ../results/Uniform-FPS_2021_05_19_12_51_46
+Creando archivo de log ../results/Uniform-FPS_2021_05_19_12_51_46/log.txt
+Ejecutando trainer.py para armadillo.obj (2021_05_19_12_51_46) ...
+python3 trainer.py ../data/armadillo.obj --outputDir ../results/Uniform-FPS_2021_05_19_12_51_46 --samplingMethod Uniform-FPS --epochLengthPow 6
+Num GPUs Available:  1
+args.samplingMethod == 'Uniform-FPS'
+[INFO] Precomuting bvh trees...
+[INFO] Done precomputing
+UniformFPS.__init__
+denseSamples = self._uniformSampler.sample(10000000)
+x.shape = (10000000, 3)
+x[0] = [-0.96716378 -0.04913513  0.4921051 ]
+x.shape = (10000000, 3)
+self._denseSamples.shape = (10000000, 3)
+self._denseSamples[0] = [-0.5313104  -0.30959889 -0.54478168]
+createSequences
+queryPts = pointSampler.sample(1000000)
+UniformFPS.sample
+UniformFPS._fpsLarge
+self._denseSamples.shape = (10000000, 3)
+self._distanceSq_Fast(perm[0], self._denseSamples, ds)
+ds.shape = (10000000,)
+iteracion 10
+fin iteracion 10
+iteracion 20
+fin iteracion 20
+iteracion 30
+fin iteracion 30
+iteracion 40
+fin iteracion 40
+iteracion 50
+fin iteracion 50
+iteracion 60
+fin iteracion 60
+iteracion 70
+fin iteracion 70
+iteracion 80
+fin iteracion 80
+iteracion 90
+fin iteracion 90
+iteracion 100
+idx = np.argmax(ds, axis=0)
+self._distanceSq_Fast(perm[i], self._denseSamples, tmp)
+ds = np.minimum(ds, tmp)
+fin iteracion 100
+iteracion 110
+fin iteracion 110

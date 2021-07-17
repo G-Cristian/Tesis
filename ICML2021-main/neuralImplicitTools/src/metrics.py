@@ -30,6 +30,7 @@ if __name__ == "__main__":
     parser.add_argument('--archPath', default=None)
     parser.add_argument('--res', default=128, type=int)
     parser.add_argument('--meshExt', default='obj', type=str, help="Extension of mesh geometries.")
+    parser.add_argument('--resultsName', default='results', type=str, help="Name of csv with results (without extension).")
     args = parser.parse_args()
 
     trainedModels = list([f.split('.h5')[0] for f in os.listdir(args.weightPath) if '.h5' in f])
@@ -38,7 +39,8 @@ if __name__ == "__main__":
     
     uniformGrid = cubeMarcher.createGrid(args.res)
 
-    csvFile = open(os.path.join(args.weightPath,'results.csv'), 'w')
+    resultsName = '{0}.csv'.format(args.resultsName)
+    csvFile = open(os.path.join(args.weightPath, resultsName), 'w')
 
     csvWriter = csv.writer(csvFile, delimiter=',')
     csvWriter.writerow(['Name', 'Grid Error', 'Surface Error', 'Importance Error'])

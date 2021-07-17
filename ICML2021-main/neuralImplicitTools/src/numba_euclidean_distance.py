@@ -111,8 +111,11 @@ def euclidean_distance_from_point_variation(i_array_1, point, normals_array_1, n
         #cosAngle = normal_point.dot(normals_array_1[pos])
         #absCosAngle = abs(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2])
         ePowCosAngle = math.e**(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2])
+        #ePowCosAngle = math.e**(60*(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2]))
+        #tmpCosAngle = (1.0001+(normals_array_1[pos][0]*normal_point[0] + normals_array_1[pos][1]*normal_point[1] + normals_array_1[pos][2]*normal_point[2]))/2.0001
         #o_array[pos] = (x * x + y * y + z * z) / (absCosAngle + 0.0001)
         o_array[pos] = (x * x + y * y + z * z) / (ePowCosAngle)
+        #o_array[pos] = (x * x + y * y + z * z) * (-math.log(tmpCosAngle))
 
     #cuda.syncthreads()
 
@@ -133,9 +136,12 @@ def numpy_euclidean_distance_from_point_variation(point, array, pointNormal, arr
     absCosAngles = numpy.full(arrayNormals.shape, pointNormal)
     #absCosAngles = numpy.abs(numpy.sum(arrayNormals * absCosAngles, axis=1)) + 0.0001
     ePowCosAngle = numpy.power(math.e, numpy.sum(arrayNormals * absCosAngles, axis=1))
+    #ePowCosAngle = numpy.power(math.e, 60*numpy.sum(arrayNormals * absCosAngles, axis=1))
+    #tmpCosAngles = (1.0001+(numpy.sum(arrayNormals * absCosAngles, axis=1)))/2.0001
 
     #return output/absCosAngles
     return output/ePowCosAngle
+    #return output*(-numpy.log(tmpCosAngles))
 
 @cuda.jit
 def numba_arg_max(array, originalIndices, outputIndices, mid, end):
@@ -249,6 +255,7 @@ if __name__ == "__main__":
     pytho_call_euclidean_distance_from_point(numpy.array([2.,4.,8.]), data, output)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    print(output.shape)
     #print(output)
 
     print("numpy_euclidean_distance_from_point(numpy.array([2,4,8]), data, output)")
@@ -256,6 +263,7 @@ if __name__ == "__main__":
     output = numpy_euclidean_distance_from_point(numpy.array([2.,4.,8.]), data)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    print(output.shape)
     #print(output)
 
     print("pytho_call_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, output)")
@@ -263,6 +271,7 @@ if __name__ == "__main__":
     pytho_call_euclidean_distance_from_point_variation(numpy.array([2.,4.,8.]), data, numpy.array([-2.,-4.,-8.]), data, output)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    print(output.shape)
     #print(output)
 
     print("numpy_euclidean_distance_from_point_variation(numpy.array([2,4,8]), data, output)")
@@ -270,7 +279,9 @@ if __name__ == "__main__":
     output = numpy_euclidean_distance_from_point_variation(numpy.array([2.,4.,8.]), data, numpy.array([-2.,-4.,-8.]), data)
     end_time = time.time()
     print("elapsed time={0}".format(end_time-start_time))
+    print(output.shape)
     #print(output)
+
     
     #min_between_arrays_store_in_first[blocks_per_grid, threads_per_block](data, data2)
     #maxIdx = argmax(data3, data2, tmpIndices)

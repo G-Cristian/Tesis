@@ -7,14 +7,16 @@ date_time=$(date +"%Y_%m_%d_%H_%M_%S")
 name=$samplingMethod'_'$date_time
 outputDir="../results/$name"
 
-dataDir="../dataset_09_09"
+dataFolder="dataset_10_12"
+dataDir="../$dataFolder"
 meshExt="stl"
+resultsName="results_$dataFolder"
 
 logfile="../results/$name/log.txt"
 completeLogfile="../results/$name/complete_log.txt"
 
 train_args="--outputDir $outputDir --samplingMethod $samplingMethod --epochLengthPow 5 --useNormals 1"
-#train_args="--outputDir $outputDir --samplingMethod $samplingMethod --epochLengthPow 5 --useNormals 0 --partitionPlanes xyz"
+#train_args="--outputDir $outputDir --samplingMethod $samplingMethod --epochLengthPow 5"
 #train_args="--outputDir $outputDir --samplingMethod $samplingMethod --epochLengthPow 6"
 #train_args="--outputDir $outputDir --showVis 1 --reconstructionRes 128"
 
@@ -72,11 +74,11 @@ echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."
 echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."  >> "$logfile"
 echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."  >> "$completeLogfile"
 
-echo "python3 metrics.py $outputDir $dataDir --meshExt $meshExt"
-echo "python3 metrics.py $outputDir $dataDir --meshExt $meshExt" >> "$logfile"
-echo "python3 metrics.py $outputDir $dataDir --meshExt $meshExt" >> "$completeLogfile"
+echo "python3 metrics.py $outputDir $dataDir --meshExt $meshExt --resultsName $resultsName"
+echo "python3 metrics.py $outputDir $dataDir --meshExt $meshExt --resultsName $resultsName" >> "$logfile"
+echo "python3 metrics.py $outputDir $dataDir --meshExt $meshExt --resultsName $resultsName" >> "$completeLogfile"
 
-python3 metrics.py $outputDir $dataDir --meshExt $meshExt >> "$completeLogfile"
+python3 metrics.py $outputDir $dataDir --meshExt $meshExt --resultsName $resultsName >> "$completeLogfile"
 
 echo "... Fin ejecutando metrics.py -- $(date +"%Y_%m_%d_%H_%M_%S") --"
 echo "... Fin ejecutando metrics.py -- $(date +"%Y_%m_%d_%H_%M_%S") --" >> "$logfile"

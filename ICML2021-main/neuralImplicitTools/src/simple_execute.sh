@@ -9,7 +9,7 @@ outputDir="../results/$name"
 logfile="../results/$name/log.txt"
 completeLogfile="../results/$name/complete_log.txt"
 train_args="--outputDir $outputDir --samplingMethod $prefix_name --epochLengthPow 5 --useNormals 1"
-#train_args="--outputDir $outputDir --epochLengthPow 6 --epochs 1000 --writeOutEpochs 1"
+#train_args="--outputDir $outputDir --samplingMethod $prefix_name --epochLengthPow 5"
 #train_args="--outputDir $outputDir --showVis 1 --reconstructionRes 128"
 
 echo "Inicio -- $date_time --"
@@ -30,17 +30,27 @@ echo "Inicio -- $(date +"%Y_%m_%d_%H_%M_%S") --"
 echo "Inicio -- $(date +"%Y_%m_%d_%H_%M_%S") --" >> "$logfile"
 echo "Inicio -- $(date +"%Y_%m_%d_%H_%M_%S") --" >> "$completeLogfile"
 
-obj_file="armadillo.obj"
+modelName="armadillo"
+#modelName="bumpy-cube"
+#modelName="36372"
+mesh_ext="obj"
+#mesh_ext="stl"
+obj_file="$modelName.$mesh_ext"
+
+data_path="../data"
+#data_path="../dataset_13_15"
+
+resultsName="results_$modelName"
 
 echo "Ejecutando trainer.py para $obj_file ($(date +"%Y_%m_%d_%H_%M_%S")) ..."
 echo "Ejecutando trainer.py para $obj_file ($(date +"%Y_%m_%d_%H_%M_%S")) ..." >> "$logfile"
 echo "Ejecutando trainer.py para $obj_file ($(date +"%Y_%m_%d_%H_%M_%S")) ..." >> "$completeLogfile"
 
-echo "python3 trainer.py ../data/$obj_file $train_args"
-echo "python3 trainer.py ../data/$obj_file $train_args" >> "$logfile"
-echo "python3 trainer.py ../data/$obj_file $train_args" >> "$completeLogfile"
+echo "python3 trainer.py $data_path/$obj_file $train_args"
+echo "python3 trainer.py $data_path/$obj_file $train_args" >> "$logfile"
+echo "python3 trainer.py $data_path/$obj_file $train_args" >> "$completeLogfile"
 
-python3 trainer.py ../data/$obj_file $train_args >> "$completeLogfile"
+python3 trainer.py $data_path/$obj_file $train_args >> "$completeLogfile"
 
 echo "... Fin ejecutando trainer.py para $obj_file -- $(date +"%Y_%m_%d_%H_%M_%S") --"
 echo "... Fin ejecutando trainer.py para $obj_file -- $(date +"%Y_%m_%d_%H_%M_%S") --" >> "$logfile"
@@ -64,11 +74,11 @@ echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."
 echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..." >> "$logfile"
 echo "Ejecutando metrics.py ($(date +"%Y_%m_%d_%H_%M_%S")) ..."  >> "$completeLogfile"
 
-echo "python3 metrics.py $outputDir ../data/"
-echo "python3 metrics.py $outputDir ../data/" >> "$logfile"
-echo "python3 metrics.py $outputDir ../data/" >> "$completeLogfile"
+echo "python3 metrics.py $outputDir $data_path/ --meshExt $mesh_ext --resultsName $resultsName"
+echo "python3 metrics.py $outputDir $data_path/ --meshExt $mesh_ext --resultsName $resultsName" >> "$logfile"
+echo "python3 metrics.py $outputDir $data_path/ --meshExt $mesh_ext --resultsName $resultsName" >> "$completeLogfile"
 
-python3 metrics.py $outputDir ../data/ >> "$completeLogfile"
+python3 metrics.py $outputDir $data_path/ --meshExt $mesh_ext --resultsName $resultsName >> "$completeLogfile"
 
 echo "... Fin ejecutando metrics.py -- $(date +"%Y_%m_%d_%H_%M_%S") --"
 echo "... Fin ejecutando metrics.py -- $(date +"%Y_%m_%d_%H_%M_%S") --" >> "$logfile"

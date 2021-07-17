@@ -1,0 +1,27 @@
+Inicio -- 2021_05_19_10_35_21 --
+Creando carpeta ../results/Uniform-FPS_2021_05_19_10_35_21
+Creando archivo de log ../results/Uniform-FPS_2021_05_19_10_35_21/log.txt
+Ejecutando trainer.py para armadillo.obj (2021_05_19_10_35_21) ...
+python3 trainer.py ../data/armadillo.obj --outputDir ../results/Uniform-FPS_2021_05_19_10_35_21 --samplingMethod Uniform-FPS --epochLengthPow 4
+Num GPUs Available:  1
+args.samplingMethod == 'Uniform-FPS'
+[INFO] Precomuting bvh trees...
+[INFO] Done precomputing
+UniformFPS.__init__
+denseSamples = self._uniformSampler.sample(100000)
+x.shape = (100000, 3)
+x[0] = [0.8179518  0.5930802  0.24028006]
+x.shape = (100000, 3)
+self._denseSamples.shape = (100000, 3)
+self._denseSamples[0] = [-0.63621874  0.16795483  0.7191017 ]
+self._distancesInDisk = True
+createSequences
+queryPts = pointSampler.sample(10000)
+UniformFPS.sample
+UniformFPS._fpsLarge
+self._denseSamples.shape = (100000, 3)
+UniformFPS._distanceSq
+point.shape = (3,)
+arrayOfPoints.shape = (100000, 3)
+... Fin ejecutando trainer.py para armadillo.obj -- 2021_05_19_10_35_42 --
+Fin -- 2021_05_19_10_35_42 --
