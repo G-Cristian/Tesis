@@ -1,0 +1,11 @@
+Inicio -- 2021_08_30_21_40_56 --
+Ejecutando trainer.py para armadillo.obj (2021_08_30_21_40_56) ...
+python3 trainer.py ../data/armadillo.obj --outputDir ../results/Uniform-FPS_2021_08_30_21_40_56 --samplingMethod Uniform-FPS --epochLengthPow 5 --useNormals 0 --gpu 0
+... Fin ejecutando trainer.py para armadillo.obj -- 2021_08_30_23_07_06 --
+Ejecutando modelmesher.py para armadillo.obj (2021_08_30_23_07_06) ...
+python3 modelmesher.py ../results/Uniform-FPS_2021_08_30_21_40_56
+... Fin ejecutando modelmesher.py para armadillo.obj -- 2021_08_30_23_09_57 --
+Ejecutando metrics.py (2021_08_30_23_09_57) ...
+python3 metrics.py ../results/Uniform-FPS_2021_08_30_21_40_56 ../data/ --meshExt obj --resultsName results_armadillo
+... Fin ejecutando metrics.py -- 2021_08_30_23_23_07 --
+Fin -- 2021_08_30_23_23_07 --
