@@ -1,0 +1,11 @@
+Inicio -- 2021_08_31_13_28_19 --
+Ejecutando trainer.py para bumpy-cube.obj (2021_08_31_13_28_19) ...
+python3 trainer.py ../data/bumpy-cube.obj --outputDir ../results/Uniform-FPS_2021_08_31_13_28_19 --samplingMethod Uniform-FPS --epochLengthPow 5 --useNormals 0 --gpu 0
+... Fin ejecutando trainer.py para bumpy-cube.obj -- 2021_08_31_14_53_56 --
+Ejecutando modelmesher.py para bumpy-cube.obj (2021_08_31_14_53_56) ...
+python3 modelmesher.py ../results/Uniform-FPS_2021_08_31_13_28_19
+... Fin ejecutando modelmesher.py para bumpy-cube.obj -- 2021_08_31_14_56_50 --
+Ejecutando metrics.py (2021_08_31_14_56_50) ...
+python3 metrics.py ../results/Uniform-FPS_2021_08_31_13_28_19 ../data/ --meshExt obj --resultsName results_bumpy-cube
+... Fin ejecutando metrics.py -- 2021_08_31_15_10_49 --
+Fin -- 2021_08_31_15_10_49 --
