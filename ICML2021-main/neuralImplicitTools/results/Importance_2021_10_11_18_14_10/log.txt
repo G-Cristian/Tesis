@@ -1,0 +1,11 @@
+Inicio -- 2021_10_11_18_14_10 --
+Ejecutando trainer.py para armadillo.obj (2021_10_11_18_14_10) ...
+python3 trainer.py ../data/armadillo.obj --outputDir ../results/Importance_2021_10_11_18_14_10 --samplingMethod Importance --epochLengthPow 5 --gpu 0
+... Fin ejecutando trainer.py para armadillo.obj -- 2021_10_11_18_22_05 --
+Ejecutando modelmesher.py para armadillo.obj (2021_10_11_18_22_05) ...
+python3 modelmesher.py ../results/Importance_2021_10_11_18_14_10
+... Fin ejecutando modelmesher.py para armadillo.obj -- 2021_10_11_18_24_53 --
+Ejecutando metrics.py (2021_10_11_18_24_53) ...
+python3 metrics.py ../results/Importance_2021_10_11_18_14_10 ../data/ --meshExt obj --resultsName results_armadillo
+... Fin ejecutando metrics.py -- 2021_10_11_18_38_03 --
+Fin -- 2021_10_11_18_38_03 --
