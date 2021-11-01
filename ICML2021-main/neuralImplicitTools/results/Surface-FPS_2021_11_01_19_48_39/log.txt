@@ -1,0 +1,11 @@
+Inicio -- 2021_11_01_19_48_39 --
+Ejecutando trainer.py para armadillo.obj (2021_11_01_19_48_39) ...
+python3 trainer.py ../data/armadillo.obj --outputDir ../results/Surface-FPS_2021_11_01_19_48_39 --samplingMethod Surface-FPS --epochLengthPow 5 --useNormals 0 --gpu 0
+... Fin ejecutando trainer.py para armadillo.obj -- 2021_11_01_20_06_10 --
+Ejecutando modelmesher.py para armadillo.obj (2021_11_01_20_06_10) ...
+python3 modelmesher.py ../results/Surface-FPS_2021_11_01_19_48_39
+... Fin ejecutando modelmesher.py para armadillo.obj -- 2021_11_01_20_08_59 --
+Ejecutando metrics.py (2021_11_01_20_08_59) ...
+python3 metrics.py ../results/Surface-FPS_2021_11_01_19_48_39 ../data/ --meshExt obj --resultsName results_armadillo
+... Fin ejecutando metrics.py -- 2021_11_01_20_22_07 --
+Fin -- 2021_11_01_20_22_07 --
